@@ -18,27 +18,36 @@ let selFiles = [];
 async function checkServer(){
   const bar = document.getElementById('srvBar');
   const txt = document.getElementById('srvTxt');
+
+  // Render cold start 대기 안내
+  txt.textContent = '● 서버 시작 중... (최초 접속 시 최대 60초 소요)';
+  txt.style.color = 'var(--orange)';
+  bar.className   = 'srv-bar warn';
+
   try {
-    const r = await fetch(PROXY + '/', { signal: AbortSignal.timeout(4000) });
+    const r = await fetch(PROXY + '/', { signal: AbortSignal.timeout(70000) }); // 70초
     const d = await r.json();
-    const ocrOk  = d.services?.msds_ocr === '준비됨';
-    const krOk   = d.services?.kreach   === '정상';
-    const koOk   = d.services?.kosha    === '정상';
+    const ocrOk = d.services?.msds_ocr === '준비됨';
+    const krOk  = d.services?.kreach   === '정상';
+    const koOk  = d.services?.kosha    === '정상';
     if (ocrOk && krOk && koOk) {
       txt.textContent = '● 서버 연결됨 ✅  OCR + K-REACH + KOSHA 준비 완료';
       txt.style.color = 'var(--green)';
       bar.className   = 'srv-bar';
     } else {
       const warn = [];
-      if (!ocrOk) warn.push('GPT OCR 미준비 (OPENAI_KEY 확인)');
+      if (!ocrOk) warn.push('GPT OCR 미준비 (OPENAI_KEY 환경변수 확인)');
       if (!krOk)  warn.push('K-REACH 오류');
       if (!koOk)  warn.push('KOSHA 오류');
       txt.textContent = '● 서버 연결됨 ⚠️  ' + warn.join(' / ');
       txt.style.color = 'var(--orange)';
       bar.className   = 'srv-bar warn';
     }
-  } catch {
-    txt.textContent = '● 서버 미연결 ❌  —  python app.py 를 실행해 주세요';
+  } catch(err) {
+    const isTimeout = err.name === 'TimeoutError' || err.message?.includes('timeout');
+    txt.textContent = isTimeout
+      ? '● 서버 응답 없음 ❌  — Render 대시보드에서 서비스 상태 확인'
+      : '● 서버 연결 실패 ❌  — ' + err.message;
     txt.style.color = 'var(--red)';
     bar.className   = 'srv-bar warn';
   }
