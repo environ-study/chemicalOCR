@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!--
+  index.html — MSDS AI OCR 분석 포털 (버전 3)
+  ──────────────────────────────────────────────
+  파일 업로드 → GPT-4o OCR → K-REACH · KOSHA 조회
+  직접입력 기능 없음 (버전1 구조 기반)
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSDS AI 분석 | 화관법 포털</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══ 헤더 ══ -->
+<header>
+  <div class="h-inner">
+    <a href="#" class="logo">
+      <span style="font-size:22px">⚗</span>
+      <div>
+        <div class="logo-main">화관법 전문 포털</div>
+        <div class="logo-sub">화학물질관리법 규제 조회 시스템</div>
+      </div>
+    </a>
+  </div>
+</header>
+
+<!-- ══ 상단 범례 바 (sticky) ══ -->
+<div class="global-legend">
+  <strong>범례</strong>
+  <span style="display:flex;align-items:center;gap:4px">
+    <b style="color:#dc2626">완전금지</b> 금지물질 (함량 무관)
+  </span>
+  <span class="tag-org" style="display:inline-block">규제</span>
+  <span class="tag-gray" style="display:inline-block">기존화학</span>
+  <span style="display:flex;align-items:center;gap:3px">
+    <b style="color:#ea580c">미만</b> = 최대값 미포함 (&lt;)
+  </span>
+  <span><b>이하</b> = 최대값 포함 (≤)</span>
+  <span style="margin-left:auto;font-size:10px">마우스 오버 → 상세 설명</span>
+</div>
+
+<!-- ══ 히어로 배너 ══ -->
+<div class="hero">
+  <h1>📄 MSDS AI OCR 분석</h1>
+  <p>PDF · JPG · PNG 업로드 → GPT-4o가 구성성분 자동 추출 → K-REACH (화평법) · KOSHA (산안법) 규제 동시 조회</p>
+  <div class="pills">
+    <span class="pill">PDF · JPG · PNG</span>
+    <span class="pill">GPT-4o OCR</span>
+    <span class="pill">화평법 K-REACH</span>
+    <span class="pill">산업안전보건법 KOSHA</span>
+    <span class="pill">유해화학물질 자동 판정</span>
+  </div>
+</div>
+
+<!-- ══ 메인 콘텐츠 ══ -->
+<div class="wrap">
+
+  <!-- 서버 상태 바 -->
+  <div class="srv-bar" id="srvBar">
+    <span>🔌</span>
+    <span id="srvTxt">서버 연결 확인 중...</span>
+  </div>
+
+  <!-- 사용 안내 -->
+  <div class="tip">
+    <strong>💡 사용 방법</strong>
+    ① <b>MSDS 파일</b>(PDF·JPG·PNG)을 드래그하거나 클릭해서 선택하세요 &nbsp;→&nbsp;
+    ② <b>분석 시작</b>을 누르면 GPT-4o가 구성성분 CAS번호·함량을 자동 추출합니다 &nbsp;→&nbsp;
+    ③ K-REACH · KOSHA 규제 결과가 자동으로 조회됩니다.<br>
+    📋 <b>여러 파일 동시 선택 가능</b> &nbsp;|&nbsp;
+    <code>Ctrl+V</code>로 캡처 이미지 붙여넣기도 지원합니다.
+  </div>
+
+  <!-- 업로드 카드 -->
+  <div class="card">
+    <div class="card-head">
+      📄 MSDS 파일 업로드 (PDF · JPG · PNG)
+    </div>
+    <div class="card-body">
+
+      <!-- 드롭존 -->
+      <div class="drop-zone" id="dropZone"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="dz(event,'add')"
+           ondragleave="dz(event,'rem')"
+           ondrop="onDrop(event)">
+        <div class="drop-icon">📄</div>
+        <div class="drop-title">클릭하거나 파일을 드래그하세요</div>
+        <div class="drop-sub">
+          PDF · JPG · PNG &nbsp;|&nbsp; <b>여러 파일 동시 선택 가능</b> &nbsp;|&nbsp; 최대 15MB/파일<br>
+          <span style="color:var(--pri);font-weight:700">Ctrl+V</span>로 캡처 이미지 붙여넣기도 가능
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" multiple
+             onchange="setFiles(event.target.files)">
+
+      <!-- 파일 미리보기 -->
+      <div class="file-prev" id="filePrev">
+        <span id="fIcon" style="font-size:22px">📄</span>
+        <div class="file-info">
+          <div class="file-name" id="fName"></div>
+          <div class="file-size" id="fSize"></div>
+        </div>
+        <button class="file-rm" onclick="clearFile()">✕</button>
+      </div>
+
+      <!-- 진행 바 -->
+      <div class="prog-wrap" id="progWrap">
+        <div class="prog-bar">
+          <div class="prog-fill" id="progFill"></div>
+        </div>
+        <div class="prog-label" id="progLabel">분석 준비 중...</div>
+      </div>
+
+      <!-- 분석 버튼 -->
+      <button class="run-btn" id="runBtn" onclick="doAnalyze()" disabled>
+        🔍 MSDS 통합 분석 시작 (OCR → K-REACH · KOSHA 조회)
+      </button>
+    </div>
+  </div>
+
+  <!-- 결과 영역 -->
+  <div id="resultArea"></div>
+
+</div><!-- /wrap -->
+
+<script src="app.js"></script>
+</body>
+</html>
