@@ -8,14 +8,7 @@
  */
 
 // ── Railway 배포 URL 로 변경하거나, 로컬 실행 시 http://localhost:5000 사용 ──
-const PROXY = (()=>{
-  // 같은 도메인에 Flask가 함께 배포된 경우 상대 경로 사용
-  if (location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
-    return '';   // 같은 origin → 상대경로 ''
-  }
-  return 'http://localhost:5000';
-})();
-
+const PROXY = 'https://chemicalocr-api.onrender.com';
 let selFiles = [];
 
 /* ══════════════════════════════════════════
