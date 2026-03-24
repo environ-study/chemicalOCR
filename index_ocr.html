@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!--
+  index.html — MSDS AI OCR 분석 포털 (버전 3)
+  ──────────────────────────────────────────────
+  파일 업로드 → GPT-4o OCR → K-REACH · KOSHA 조회
+  직접입력 기능 없음 (버전1 구조 기반)
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSDS AI 분석 | 화관법 포털</title>
+  <link rel="stylesheet" href="style_ocr.css">
+</head>
+<body>
+
+<div class="hero">
+  <h1>✏️ MSDS AI OCR 분석</h1>
+  <p>파일을 업로드하면 GPT-4o가 CAS번호와 함량을 추출하여 화관법 · 산안법 규제를 즉시 조회합니다.</p>
+  <div class="pills">
+    <span class="pill">화평법 K-REACH</span>
+    <span class="pill">산업안전보건법 KOSHA</span>
+    <span class="pill">유해화학물질 판정</span>
+    <span class="pill">금지·특별관리물질</span>
+  </div>
+</div>
+
+<!-- ══ 메인 콘텐츠 ══ -->
+<div class="wrap">
+  <div class="info-row">
+    <div class="tip tip-green">
+      <strong>🔌 서버 상태</strong>
+      <div style="margin-top:8px;font-size:13px;font-weight:700" id="srvBar">
+        <span id="srvTxt">확인 중...</span>
+      </div>
+    </div>
+
+    <div class="tip tip-white">
+      <strong>📌 범례</strong>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;font-size:12px">
+        <span><b style="color:#dc2626">완전금지</b> — 금지물질 (함량 무관)</span>
+        <span><span class="tag-org">규제</span> — 유독·허가·제한·사고대비</span>
+        <span><span class="tag-yel">기준%</span> — 인체등유해성물질</span>
+        <span><span class="tag-gray">기존화학</span> — KE번호 보유</span>
+        <span><b style="color:#ea580c">미만</b>(&lt;) / <b>이하</b>(≤) — 최대값 포함 여부</span>
+      </div>
+    </div>
+    <!-- 사용 안내 -->
+  <div class="tip">
+    <strong>💡 사용 방법</strong>
+    ① <b>MSDS 파일</b>(PDF·JPG·PNG)을 드래그하거나 클릭해서 선택하세요
+    <br>② <b>분석 시작</b>을 누르면 GPT-4o가 구성성분 CAS번호·함량을 자동 추출합니다
+    <br>③ K-REACH · KOSHA 규제 결과가 자동으로 조회됩니다.<br>
+    📋 <b>여러 파일 동시 선택 가능</b> &nbsp;|&nbsp;
+    <code>Ctrl+V</code>로 캡처 이미지 붙여넣기도 지원합니다.
+  </div>
+  </div>
+
+  
+
+  <!-- 업로드 카드 -->
+  <div class="card">
+    <div class="card-head">
+      📄 MSDS 파일 업로드 (PDF · JPG · PNG)
+    </div>
+    <div class="card-body">
+
+      <!-- 드롭존 -->
+      <div class="drop-zone" id="dropZone"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="dz(event,'add')"
+           ondragleave="dz(event,'rem')"
+           ondrop="onDrop(event)">
+        <div class="drop-icon">📄</div>
+        <div class="drop-title">클릭하거나 파일을 드래그하세요</div>
+        <div class="drop-sub">
+          PDF · JPG · PNG &nbsp;|&nbsp; <b>여러 파일 동시 선택 가능</b> &nbsp;|&nbsp; 최대 15MB/파일<br>
+          <span style="color:var(--pri);font-weight:700">Ctrl+V</span>로 캡처 이미지 붙여넣기도 가능
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" multiple
+             onchange="setFiles(event.target.files)">
+
+      <!-- 파일 미리보기 -->
+      <div class="file-prev" id="filePrev">
+        <span id="fIcon" style="font-size:22px">📄</span>
+        <div class="file-info">
+          <div class="file-name" id="fName"></div>
+          <div class="file-size" id="fSize"></div>
+        </div>
+        <button class="file-rm" onclick="clearFile()">✕</button>
+      </div>
+
+      <!-- 진행 바 -->
+      <div class="prog-wrap" id="progWrap">
+        <div class="prog-bar">
+          <div class="prog-fill" id="progFill"></div>
+        </div>
+        <div class="prog-label" id="progLabel">분석 준비 중...</div>
+      </div>
+
+      <!-- 분석 버튼 -->
+      <button class="run-btn" id="runBtn" onclick="doAnalyze()" disabled>
+        🔍 MSDS 통합 분석 시작 (OCR → K-REACH · KOSHA 조회)
+      </button>
+    </div>
+  </div>
+
+  <!-- 결과 영역 -->
+  <div id="resultArea"></div>
+
+</div><!-- /wrap -->
+
+<script src="app.js"></script>
+</body>
+</html>
